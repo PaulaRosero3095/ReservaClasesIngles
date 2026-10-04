@@ -7,23 +7,32 @@ import {formatearPrecio, CLASES} from '../data/clases';
 export default function Card({ clase, onPress }){
     return (
         <Pressable
-            onPress={onPress}
+            onPress={onPress} style={style.tarjeta}
         >
-            <Image source={{ uri: clase.image }} />
-            <View>
+            <Image source={{ uri: clase.image }} style={style.imagen} />
+            <View style={style.cuerpo}>
                 <EtiquetaNivel nivel={clase.nivel} />
             </View>
 
             <Text style={style.titulo} numberOfLines={2}>{clase.titulo}
         </Text>
+        <View style={style.filaProfesor}>
+          <Image source={{ uri: clase.profesor.foto }} style={style.avatar} />
+          <Text style={style.profesor} numberOfLines={1}>{clase.profesor.nombre}</Text>
+        </View>
 
-            <View>
-                <Text>{clase.nombre}</Text>
-                <Text>{clase.horarios}</Text>
-                <Text>{clase.precio}</Text>
-            </View>
+        <View style={style.detalles}>
+          <Text style={style.meta}>Modalidad: {clase.modalidad}</Text>
+          <Text style={style.meta}>Rating: {clase.rating}</Text>
+        </View>
+
+        <View style={style.pie}>
+          <Text style={style.meta}>Duración: {clase.duracion} minutos</Text>
+          <Text style={style.precio}>{formatearPrecio(clase.precio)}</Text>
+        </View>
+      
         </Pressable>
-    )
+    );
 }
 
 const style = StyleSheet.create({
