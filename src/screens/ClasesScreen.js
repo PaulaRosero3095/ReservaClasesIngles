@@ -74,7 +74,10 @@ export default function ClasesScreen({ navigation }) {
                     />
                 )}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal, flexGrow: 1 }}
+                contentContainerStyle={{
+                    paddingHorizontal,
+                    flexGrow: 1
+                }}
                 numColumns={columnas}
                 ListEmptyComponent={
                     <EstadoVacio

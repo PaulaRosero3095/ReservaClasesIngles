@@ -17,7 +17,7 @@ export default function ClasesStack() {
       <Stack.Screen
                 name="DetalleClase"
                 component={DetalleClaseScreen}
-                options={{ title: 'Detalle', headerBackTitle: 'Volver', headerTintColor: '#FFFFFF', headerStyle: { backgroundColor: '#631fe1' } }}
+                options={{ title: 'Detalle', headerBackTitle: 'Atras'} }
             />
     </Stack.Navigator>
   );
