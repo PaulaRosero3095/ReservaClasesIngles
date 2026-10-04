@@ -1,19 +1,25 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { colors, spacing } from '../theme';
 
-export default function EtiquetaNivel({nivel}) { 
+export default function EtiquetaNivel({nivel, profesor, horarios, precio}) { 
     return (
-        <View style={styles.contenedor}>
+        <View style={[styles.contenedor, {backgroundColor: colors.fondo}]}>
             <Text style={styles.texto}>{nivel}</Text>
+            <Text style={styles.texto}>{profesor}</Text>
+            <Text style={styles.texto}>{horarios}</Text>
+            <Text style={styles.texto}>{precio}</Text>
         </View>
+        
          
     )
 }
 
 const styles = StyleSheet.create({
     contenedor: {
+        alignSelf: 'auto',
         paddingVertical: 3,
-        paddingHorizontal: 2,
+        paddingHorizontal: spacing.md,
         borderRadius: full,
         borderWidth: 1,
 
