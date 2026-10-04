@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 
+// Paleta central del proyecto para mantener la misma identidad visual en toda la app.
 export const colors = {
   fondo: '#F6F7FB',
   superficie: '#FFFFFF',
@@ -15,30 +16,34 @@ export const colors = {
   borde: '#E5E7EB',
 };
 
+// Escala de espaciado reutilizable para mantener consistencia en márgenes y paddings.
 export const spacing = {
-  xs: 4,
-  sm: 8,
+  xs: 2,
+  sm: 2,
   md: 12,
   lg: 16,
   xl: 24,
   xxl: 32,
 };
 
+// Radio de bordes común para tarjetas, inputs y elementos redondeados.
 export const radius = {
-  sm: 8,
-  md: 14,
-  lg: 20,
-  full: 999,
+  sm: 16,
+  md: 18,
+  lg: 50,
+  full: 9999,
 };
 
+// Tipografías base usadas en la interfaz para mantener un estilo uniforme.
 export const typography = {
-  titulo: { fontSize: 20, fontWeight: '800', color: colors.texto },
+  titulo: { fontSize: 24, fontWeight: '700', color: colors.texto },
   subtitulo: { fontSize: 18, fontWeight: '700', color: colors.texto },
-  cuerpo: { fontSize: 15, color: colors.texto },
-  secundario: { fontSize: 13, color: colors.textoSuave },
+  cuerpo: { fontSize: 16, color: colors.texto },
+  secundario: { fontSize: 14, color: colors.textoSuave },
   etiqueta: { fontSize: 12, fontWeight: '600' },
 };
 
+// Sombras adaptadas según la plataforma para mejorar la profundidad visual.
 export const sombra = Platform.select({
   ios: {
     shadowColor: '#0F172A',
@@ -49,11 +54,12 @@ export const sombra = Platform.select({
   android: { elevation: 3 },
 });
 
+// Colores asociados a cada nivel del curso de inglés.
 export const coloresPorNivel = {
   Basico: colors.exito,
   Intermedio: colors.primario,
   Avanzado: colors.acento,
-  Conversacional: '#7C3AED',
+  Conversacional: '#070609',
 };
 
 export default { colors, spacing, radius, typography, sombra, coloresPorNivel };

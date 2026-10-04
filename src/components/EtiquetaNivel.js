@@ -4,12 +4,9 @@ import { colors, radius, spacing } from '../theme';
 
 export default function EtiquetaNivel({nivel, profesor, horarios, precio}) { 
     return (
-        <View style={[styles.contenedor, {backgroundColor: colors.fondo}]}>
-            <Text style={styles.texto}>{nivel}</Text>
-            <Text style={styles.texto}>{profesor}</Text>
-            <Text style={styles.texto}>{horarios}</Text>
-            <Text style={styles.texto}>{precio}</Text>
-        </View>
+        <View style={[styles.contenedor, { backgroundColor: colors.fondo }]}>
+        <Text style={styles.texto}>{nivel}</Text>
+      </View>
         
          
     )

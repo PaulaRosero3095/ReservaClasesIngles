@@ -4,33 +4,37 @@ import EtiquetaNivel from './EtiquetaNivel';
 import { colors, radius, spacing, typography } from '../theme';
 import {formatearPrecio, CLASES} from '../data/clases';
 
-export default function Card({ clase, onPress }){
+export default function Card({ clase, onPress }) {
     return (
-        <Pressable
-            onPress={onPress} style={style.tarjeta}
-        >
-            <Image source={{ uri: clase.image }} style={style.imagen} />
-            <View style={style.cuerpo}>
-                <EtiquetaNivel nivel={clase.nivel} />
-            </View>
+    <Pressable onPress={onPress} style={style.tarjeta}>
+            {/* Imagen representativa de la clase */}
+      <Image source={{ uri: clase.imagen }} style={style.imagen} />
 
-            <Text style={style.titulo} numberOfLines={2}>{clase.titulo}
-        </Text>
+      <View style={style.cuerpo}>
+        {/* Nivel de la clase como etiqueta */}
+        <EtiquetaNivel nivel={clase.nivel} />
+
+        {/* Título principal de la clase */}
+        <Text style={style.titulo} numberOfLines={2}>{clase.titulo}</Text>
+
+        {/* Foto y nombre de la persona que imparte la clase */}
         <View style={style.filaProfesor}>
           <Image source={{ uri: clase.profesor.foto }} style={style.avatar} />
           <Text style={style.profesor} numberOfLines={1}>{clase.profesor.nombre}</Text>
         </View>
 
+        {/* Modalidad */}
         <View style={style.detalles}>
           <Text style={style.meta}>Modalidad: {clase.modalidad}</Text>
-          <Text style={style.meta}>Rating: {clase.rating}</Text>
+          <Text style={style.meta}>Rating: {clase.rating}⭐</Text>
         </View>
 
+        {/* Duración y precio de la clase */}
         <View style={style.pie}>
           <Text style={style.meta}>Duración: {clase.duracion} minutos</Text>
           <Text style={style.precio}>{formatearPrecio(clase.precio)}</Text>
         </View>
-      
+      </View>
         </Pressable>
     );
 }
