@@ -13,12 +13,21 @@ export default function CampoTexto({
   keyboardType = 'default',
   autoCapitalize = 'sentences',
   maxLength,
+  editable = true,
+  onEndEditing,
+  error,
 }) {
   return (
     <View style={styles.contenedor}>
       <Text style={styles.etiqueta}>{etiqueta}</Text>
 
-      <View style={styles.inputWrapper}>
+      <View
+        style={[
+          styles.inputWrapper,
+          !editable && styles.bloqueado,
+          !!error && styles.conError,
+        ]}
+      >
         {icono && (
           <Ionicons
             name={icono}
@@ -29,7 +38,7 @@ export default function CampoTexto({
         )}
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, !editable && styles.inputBloqueado]}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
@@ -38,8 +47,12 @@ export default function CampoTexto({
           autoCapitalize={autoCapitalize}
           autoCorrect={false}
           maxLength={maxLength}
+          editable={editable}
+          onEndEditing={onEndEditing}
         />
       </View>
+
+      {!!error && <Text style={styles.textoError}>{error}</Text>}
     </View>
   );
 }
@@ -64,6 +77,14 @@ const styles = StyleSheet.create({
     height: 48,
     gap: spacing.sm,
   },
+  // campo de solo lectura (usuario ya registrado)
+  bloqueado: {
+    backgroundColor: colors.fondo,
+  },
+  // campo con error de validación
+  conError: {
+    borderColor: colors.peligro,
+  },
   icono: {
     // pequeño ajuste óptico para centrar con el texto
     marginTop: 1,
@@ -73,5 +94,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.texto,
     paddingVertical: 0,
+  },
+  inputBloqueado: {
+    color: colors.textoSuave,
+  },
+  textoError: {
+    fontSize: 12,
+    color: colors.peligro,
   },
 });

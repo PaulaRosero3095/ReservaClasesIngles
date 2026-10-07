@@ -24,6 +24,7 @@ export function ReservaProvider({children}){
                 setCargando(false);
             }    
         };
+        cargar();
     }, [])
 
     //Hacer el guardado
@@ -35,8 +36,15 @@ export function ReservaProvider({children}){
     },[reservas, cargando]);
 
     const agregarReserva = useCallback((clase, horario) =>{
+        const id = clase.id + '-' + horario;
+
+        //Revisar duplicados ANTES de guardar, así el resultado es correcto
+        if(reservas.some((r) => r.id === id)){
+            return { ok: false };
+        }
+
         const nueva ={
-            id: clase.id + '-' + horario,
+            id,
             titulo: clase.titulo,
             nivel: clase.nivel,
             profesor: clase.profesor.nombre,
@@ -44,21 +52,15 @@ export function ReservaProvider({children}){
             horario,
             creadoEn: new Date().toISOString()
         };
-        let resultado = {ok: true}
-        setReservas((previas) =>{
-            if(previas.some((r) => r.id === nueva.id)){
-                resultado = {ok: false}
-                return previas;
-            }
-            return[nueva, ...previas]
-        });//setReservas
-        return resultado
-    },[]);//Cierre del callBack
+        setReservas((previas) => [nueva, ...previas]);
+        return { ok: true };
+    },[reservas]);//Cierre del callBack
 
-const valor = useMemo(
-    () => ({cargando, agregarReserva, reservas})
-    [cargando,agregarReserva, reservas]
-)
-return <ReservasContext.Provider>{children}</ReservasContext.Provider>
+    const valor = useMemo(
+        () => ({cargando, agregarReserva, reservas}),
+        [cargando, agregarReserva, reservas]
+    );
+
+    return <ReservasContext.Provider value={valor}>{children}</ReservasContext.Provider>
 
 }; //Esta es la llave de cierre para la función

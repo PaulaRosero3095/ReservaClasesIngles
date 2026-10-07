@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, use } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Hook personalizado para manejar el almacenamiento local de datos en la aplicación.
@@ -32,4 +32,5 @@ export default function useAlmacenamiento(clave, valorInicial) {
             };
         }, [clave]
     );
+    return [valor, actualizar, listo];
 };
