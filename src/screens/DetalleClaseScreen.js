@@ -1,9 +1,19 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Alert, Image, ScrollView, Pressable } from 'react-native';
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  Image,
+  ScrollView,
+  Pressable,
+} from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import useResponsive from "../hooks/useResponsive";
+import useUsuario from "../hooks/useUsuario";
+import useReserva from "../hooks/useReserva";
 import { colors, radius, spacing, typography } from '../theme';
 import { formatearPrecio } from '../data/clases';
 import EtiquetaNivel from "../components/EtiquetaNivel";
@@ -14,13 +24,47 @@ export default function DetalleClaseScreen({ route, navigation }) {
   const { clase } = route.params;
   const { paddingHorizontal, esTablet } = useResponsive();
 
-  const [reservada, setReservada] = useState(false);
-  // 🔹 NUEVO: horario seleccionado
+  const { estaLogueado } = useUsuario();
+  const { reservas, agregarReserva, eliminarReserva } = useReserva();
+
   const [horarioSeleccionado, setHorarioSeleccionado] = useState(null);
+
+  const reservaDeEstaClase = useMemo(
+    () => reservas.find((r) => r.claseId === clase.id),
+    [reservas, clase.id]
+  );
+
+  const reservada = !!reservaDeEstaClase;
+
+  const horariosOcupados = useMemo(() => {
+    return new Set(
+      reservas.filter((r) => r.claseId !== clase.id).map((r) => r.horario)
+    );
+  }, [reservas, clase.id]);
+
+  useEffect(() => {
+    if (reservaDeEstaClase) setHorarioSeleccionado(reservaDeEstaClase.horario);
+    else setHorarioSeleccionado(null);
+  }, [reservaDeEstaClase]);
 
   const cuposDisponibles = clase.cupos - (reservada ? 1 : 0);
 
   const cambiarReserva = () => {
+    if (!estaLogueado) {
+      Alert.alert(
+        'Regístrate',
+        'Necesitas crear una cuenta para reservar una clase.',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          {
+            text: 'Ir a mi perfil',
+            onPress: () => navigation.navigate('Perfil'),
+          },
+        ]
+      );
+      return;
+    }
+
     if (reservada) {
       Alert.alert('Cancelar reserva', '¿Quieres cancelar tu reserva?', [
         { text: 'No', style: 'cancel' },
@@ -28,27 +72,39 @@ export default function DetalleClaseScreen({ route, navigation }) {
           text: 'Cancelar reserva',
           style: 'destructive',
           onPress: () => {
-            setReservada(false);
-            // Opcional: mantener el horario elegido o limpiarlo
-            // setHorarioSeleccionado(null);
+            eliminarReserva(reservaDeEstaClase.id);
+            setHorarioSeleccionado(null);
           },
         },
       ]);
       return;
     }
 
-    // 🔹 NUEVO: obligar a elegir horario antes de reservar
     if (!horarioSeleccionado) {
       Alert.alert('Elige un horario', 'Selecciona un horario antes de reservar.');
       return;
     }
-
     if (cuposDisponibles === 0) {
       Alert.alert('Clase llena', 'No quedan cupos disponibles para esta clase.');
       return;
     }
 
-    setReservada(true);
+    const resultado = agregarReserva(clase, horarioSeleccionado);
+
+    if (!resultado.ok) {
+      const mensajes = {
+        'sin-usuario': 'Necesitas registrarte para reservar.',
+        duplicada: 'Ya tienes una reserva para esta clase en ese horario.',
+        'choque-horario':
+          'Ya tienes otra clase reservada en ese mismo horario.',
+      };
+      Alert.alert(
+        'No se pudo reservar',
+        mensajes[resultado.motivo] ?? 'Intenta de nuevo.'
+      );
+      return;
+    }
+
     Alert.alert(
       'Reserva confirmada',
       `Tu reserva para el horario "${horarioSeleccionado}" se ha realizado correctamente.`
@@ -97,11 +153,12 @@ export default function DetalleClaseScreen({ route, navigation }) {
             </View>
           </View>
 
-          {/* 🔹 HORARIOS SELECCIONABLES */}
           <View>
             <Text style={typography.subtitulo}>Horarios</Text>
             <Text style={style.meta}>
-              {horarioSeleccionado
+              {reservada
+                ? `Tu reserva: ${reservaDeEstaClase.horario}`
+                : horarioSeleccionado
                 ? `Seleccionado: ${horarioSeleccionado}`
                 : 'Toca un horario para seleccionarlo'}
             </Text>
@@ -109,7 +166,9 @@ export default function DetalleClaseScreen({ route, navigation }) {
             <View style={style.horarios}>
               {clase.horarios.map((horario) => {
                 const activo = horarioSeleccionado === horario;
-                const deshabilitado = reservada; // no dejar cambiar si ya reservó
+                const ocupadoPorOtra = horariosOcupados.has(horario);
+                const deshabilitado = reservada || ocupadoPorOtra;
+
                 return (
                   <Pressable
                     key={horario}
@@ -119,21 +178,36 @@ export default function DetalleClaseScreen({ route, navigation }) {
                       style.horario,
                       activo && style.horarioActivo,
                       deshabilitado && !activo && style.horarioDeshabilitado,
+                      ocupadoPorOtra && style.horarioOcupado,
                       pressed && style.horarioPresionado,
                     ]}
                   >
                     <Ionicons
-                      name={activo ? 'radio-button-on' : 'radio-button-off'}
+                      name={
+                        ocupadoPorOtra
+                          ? 'close-circle'
+                          : activo
+                          ? 'radio-button-on'
+                          : 'radio-button-off'
+                      }
                       size={18}
-                      color={activo ? colors.superficie : colors.primario}
+                      color={
+                        activo
+                          ? colors.superficie
+                          : ocupadoPorOtra
+                          ? colors.peligro
+                          : colors.primario
+                      }
                     />
                     <Text
                       style={[
                         style.horarioTexto,
                         activo && style.horarioTextoActivo,
+                        ocupadoPorOtra && !activo && style.horarioOcupadoTexto,
                       ]}
                     >
                       {horario}
+                      {ocupadoPorOtra ? ' · Ocupado' : ''}
                     </Text>
                   </Pressable>
                 );
@@ -160,13 +234,18 @@ export default function DetalleClaseScreen({ route, navigation }) {
         </View>
 
         <BotonReservar
+          reservada={reservada}
           onPress={cambiarReserva}
-          disabled={!reservada && (cuposDisponibles === 0 || !horarioSeleccionado)}
+          disabled={
+            !reservada &&
+            (!estaLogueado || cuposDisponibles === 0 || !horarioSeleccionado)
+          }
         />
       </View>
     </View>
   );
 }
+
 const style = StyleSheet.create({
   pantalla: { flex: 1, backgroundColor: colors.fondo },
   portada: { width: '100%', backgroundColor: colors.primarioSuave },
@@ -194,9 +273,9 @@ const style = StyleSheet.create({
   profesorNombre: { fontSize: 15, fontWeight: '700', color: colors.texto },
   meta: { fontSize: 13, color: colors.textoSuave },
   horarios: {
-  gap: spacing.sm,
-  marginTop: spacing.md,
-},
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
   horario: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -214,6 +293,13 @@ const style = StyleSheet.create({
   horarioDeshabilitado: {
     opacity: 0.5,
   },
+  horarioOcupado: {
+    backgroundColor: '#FEE2E2',
+    borderColor: colors.peligro,
+  },
+  horarioOcupadoTexto: {
+    color: colors.peligro,
+  },
   horarioPresionado: {
     opacity: 0.85,
     transform: [{ scale: 0.99 }],
@@ -226,7 +312,12 @@ const style = StyleSheet.create({
   horarioTextoActivo: {
     color: colors.superficie,
   },
-  descripcion: { ...typography.cuerpo, color: colors.textoSuave, lineHeight: 22, marginTop: spacing.sm },
+  descripcion: {
+    ...typography.cuerpo,
+    color: colors.textoSuave,
+    lineHeight: 22,
+    marginTop: spacing.sm,
+  },
   barra: {
     position: 'absolute',
     left: 0,
@@ -253,6 +344,5 @@ const style = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.lg,
-  }
-  
+  },
 });
